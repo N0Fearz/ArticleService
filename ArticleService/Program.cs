@@ -1,6 +1,7 @@
 using ArticleService.Data;
 using ArticleService.Repository;
 using ArticleService.ServiceCollection;
+using ArticleService.Services;
 using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -15,15 +16,16 @@ using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
-ConnectionFactory connectionFactory = new();
-connectionFactory.UserName = "user";
-connectionFactory.Password = "jaLMcAGEyYm46Daj";
-connectionFactory.VirtualHost = "/";
-connectionFactory.HostName = "192.168.2.152";
-//connectionFactory.Uri = new Uri("amqp://user:jaLMcAGEyYm46Daj@192.168.2.152:5672");
-connectionFactory.ClientProvidedName = "Article service";
-var connection = await connectionFactory.CreateConnectionAsync();
-using var channel = await connection.CreateChannelAsync();
+//ConnectionFactory connectionFactory = new();
+//connectionFactory.UserName = "user";
+//connectionFactory.Password = "jaLMcAGEyYm46Daj";
+//connectionFactory.VirtualHost = "/";
+//connectionFactory.HostName = "192.168.2.152";
+////connectionFactory.Uri = new Uri("amqp://user:jaLMcAGEyYm46Daj@192.168.2.152:5672");
+//connectionFactory.ClientProvidedName = "Article service";
+//var connection = await connectionFactory.CreateConnectionAsync();
+//using var channel = await connection.CreateChannelAsync();
+//builder.Services.AddHostedService<RabbitMQConsumer>();
 
 //channel.QueueDeclareAsync
 
@@ -56,6 +58,8 @@ builder.Services
     .AddAuthorizationServer(builder.Configuration);
 
 builder.Services.AddTransient<IArticleRepository, ArticleRepository>();
+builder.Services.AddScoped<ITenantContext, TenantContext>();
+builder.Services.AddHostedService<RabbitMQConsumer>();
 builder.Services.AddEndpointsApiExplorer().AddSwagger();
 // Add services to the container.
 
