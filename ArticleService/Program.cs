@@ -29,7 +29,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 //channel.QueueDeclareAsync
 
-var tokenHandler = new JwtSecurityTokenHandler();
+var handler = new JwtSecurityTokenHandler();
+var Jwt = string.Empty;
+var org = string.Empty;
 
 //builder.Services.AddKeycloakWebApiAuthentication(builder.Configuration);
 builder.Services
@@ -44,10 +46,10 @@ builder.Services
 
     // First, let's just get the access token and read it as a JWT
     var token = ctx.SecurityToken;
-    var handler = new JwtSecurityTokenHandler();
-    var Jwt = handler.WriteToken(token);
+    handler = new JwtSecurityTokenHandler();
+    Jwt = handler.WriteToken(token);
     var parsedJwt = handler.ReadJwtToken(Jwt);
-    var org = parsedJwt.Claims.First(c => c.Type == "organization").Value; ;
+    org = parsedJwt.Claims.First(c => c.Type == "organization").Value; ;
 
 }
     );
@@ -57,6 +59,7 @@ builder.Services
     .AddKeycloakAuthorization()
     .AddAuthorizationServer(builder.Configuration);
 
+builder.Services.AddScoped<IMigrationService, MigrationService>();
 builder.Services.AddTransient<IArticleRepository, ArticleRepository>();
 builder.Services.AddScoped<ITenantContext, TenantContext>();
 builder.Services.AddHostedService<RabbitMQConsumer>();
@@ -65,7 +68,7 @@ builder.Services.AddEndpointsApiExplorer().AddSwagger();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddDbContextPool<ArticleContext>(opt =>
+builder.Services.AddDbContext<ArticleContext>(opt =>
     opt.UseNpgsql(
         builder.Configuration.GetConnectionString("ArticleDB"),
         o => o

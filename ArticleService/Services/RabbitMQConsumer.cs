@@ -17,11 +17,13 @@ namespace ArticleService.Services
         private IModel _channel;
         private readonly IConfiguration _configuration;
         private IServiceProvider _serviceProvider;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public RabbitMQConsumer(IConfiguration configuration, IServiceProvider serviceProvider)
+        public RabbitMQConsumer(IConfiguration configuration, IServiceProvider serviceProvider, IServiceScopeFactory serviceScopeFactory)
         {
             _serviceProvider = serviceProvider;
             _configuration = configuration;
+            _serviceScopeFactory = serviceScopeFactory;
             InitRabbitMQ();
         }
 
@@ -68,19 +70,14 @@ namespace ArticleService.Services
             return Task.CompletedTask;
         }
 
-        private Task HandleMessageAsync(string message)
+        private async Task HandleMessageAsync(string message)
         {
             // Add your message processing logic here
             Console.WriteLine($"Received message: {message}");
-            using (var scope = _serviceProvider.CreateScope())
-            {
-                var tenantContext = scope.ServiceProvider.GetRequiredService<ITenantContext>();
-                
-                // Verwerk RabbitMQ-event
-                tenantContext.SetConnectionString(message);
-            }
-
-            return Task.CompletedTask;
+            using var scope = _serviceScopeFactory.CreateScope();
+            
+            var migrationService = scope.ServiceProvider.GetRequiredService<IMigrationService>();
+            await migrationService.MigrateAsync(message);
         }
 
         private async void StopRabbitMQ()
