@@ -6,20 +6,23 @@ namespace ArticleService.Services;
 public class MigrationService : IMigrationService
 {
     private readonly IServiceProvider _serviceProvider;
-
-    public MigrationService(IServiceProvider serviceProvider)
+    private readonly IConfiguration _configuration;
+    public MigrationService(IServiceProvider serviceProvider, IConfiguration configuration)
     {
         _serviceProvider = serviceProvider;
+        _configuration = configuration;
     }
 
-    public async Task MigrateAsync(string connectionString)
+    public async Task MigrateAsync(string schemaName)
     {
+        var connectionString = _configuration.GetConnectionString("ArticleDB");
+        var connectionStringWithSchema = $"{connectionString + schemaName};";
         var optionsBuilder = new DbContextOptionsBuilder<ArticleContext>();
-        optionsBuilder.UseNpgsql(connectionString);
+        optionsBuilder.UseNpgsql(connectionStringWithSchema);
         
         using var scope = _serviceProvider.CreateScope();
         var tenantContext = scope.ServiceProvider.GetRequiredService<ITenantContext>();
-        tenantContext.SetConnectionString(connectionString);
+        tenantContext.SetConnectionString(connectionStringWithSchema);
         var dbContext = new ArticleContext(optionsBuilder.Options, scope.ServiceProvider.GetRequiredService<ITenantContext>());
 
         // Check if the migrations are needed

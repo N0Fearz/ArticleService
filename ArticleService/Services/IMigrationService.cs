@@ -2,5 +2,5 @@
 
 public interface IMigrationService
 {
-    Task MigrateAsync(string connectionString);
+    Task MigrateAsync(string schemaName);
 }
