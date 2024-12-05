@@ -1,7 +1,7 @@
 pipeline {
   agent any
   tools {
-    dotnetsdk 'dotnet-sdk-8.0'
+    dotnetsdk 'SDK 8'
   }
   stages{
     stage('Clean and checkout'){
