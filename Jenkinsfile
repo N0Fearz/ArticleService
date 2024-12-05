@@ -1,4 +1,4 @@
-﻿pipeline {
+pipeline {
   stage('Clean and checkout'){
     steps{
       cleanWs()
