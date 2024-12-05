@@ -28,6 +28,12 @@ pipeline {
         sh 'dotnet build ArticleService.sln --configuration Release'
       }
     }
+    stage('Install SonarScanner') {
+      steps {
+          sh 'dotnet tool install --global dotnet-sonarscanner'
+          sh 'export PATH="$PATH:~/.dotnet/tools"' // Zorg ervoor dat de tool in het PATH staat
+        }
+    }
     stage('SonarQube Analysis') {
         steps {
           withSonarQubeEnv('SonarQube') { // Naam van de SonarQube server zoals ingesteld in Jenkins
