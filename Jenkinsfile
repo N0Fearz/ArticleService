@@ -1,7 +1,4 @@
-﻿node {
-  stage('SCM') {
-    checkout scm
-  }
+﻿pipeline {
   stage('Clean and checkout'){
     cleanWs()
     checkout scm
