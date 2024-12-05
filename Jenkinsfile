@@ -1,8 +1,7 @@
 pipeline {
-  agent {
-      docker {
-          image 'mcr.microsoft.com/dotnet/sdk:8.0' // Replace with your required .NET SDK version
-      }
+  agent any
+  tools {
+    dotnetsdk 'dotnet-sdk-8.0'
   }
   stages{
     stage('Clean and checkout'){
