@@ -13,19 +13,19 @@ pipeline {
       
     stage('Restore'){
       steps{
-        sh 'dotnet restore src/ArticleService.sln'
+        sh 'dotnet restore ArticleService.sln'
       }
     }
       
     stage('Clean'){
       steps{
-        sh 'dotnet clean src/ArticleService.sln'
+        sh 'dotnet clean ArticleService.sln'
       }
     }
       
     stage('Build'){
       steps{
-        sh 'dotnet build src/ArticleService.sln --configuration Release'
+        sh 'dotnet build ArticleService.sln --configuration Release'
       }
     }
   }
