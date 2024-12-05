@@ -3,6 +3,10 @@ pipeline {
   tools {
     dotnetsdk 'SDK 8'
   }
+  environment {
+      DOTNET_SYSTEM_GLOBALIZATION_INVARIANT = "false"
+      PATH = "${env.HOME}/.dotnet/tools:${env.PATH}" // Voeg ~/.dotnet/tools toe aan het PATH
+  }
   stages{
     stage('Clean and checkout'){
       steps{
