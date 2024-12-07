@@ -61,13 +61,14 @@ pipeline {
     // }
     stage('Build Docker Image') {
         steps {
-          dir('ArticleService/ArticleService')
+          dir('ArticleService/ArticleService') {
             script {
                 // Zorg dat je een Dockerfile in je project hebt
                 sh """
                 docker build -t ${env.DOCKER_IMAGE}:${env.DOCKER_TAG} .
                 """
             }
+          }
         }
     }
     stage('Push Docker Image') {
