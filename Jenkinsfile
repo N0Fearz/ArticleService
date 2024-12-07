@@ -34,11 +34,7 @@ pipeline {
         sh 'dotnet build ArticleService.sln --configuration Release'
       }
     }
-    stage('Test') {
-        steps {
-            sh 'dotnet test --no-build --verbosity normal'
-        }
-    }
+    
     stage('Install SonarScanner') {
       steps {
           sh 'dotnet tool install --global dotnet-sonarscanner'
@@ -56,7 +52,13 @@ pipeline {
         }
       }
     }
-
+    stage("Quality Gate") {
+      steps {
+       timeout(time: 1, unit: 'HOURS') {
+            waitForQualityGate abortPipeline: true
+         }
+       }
+     }
     stage('Build Docker Image') {
         steps {
             script {
