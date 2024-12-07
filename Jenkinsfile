@@ -61,6 +61,7 @@ pipeline {
     // }
     stage('Build Docker Image') {
         steps {
+          dir('ArticleService/ArticleService')
             script {
                 // Zorg dat je een Dockerfile in je project hebt
                 sh """
