@@ -7,34 +7,6 @@ namespace ArticleService.ServiceCollection
 {
     public static class ServiceCollectionExtensions
     {
-        //public static IServiceCollection AddKeycloakAuthentication(this IServiceCollection services, IConfiguration configuration)
-        //{
-        //    // https://dev.to/kayesislam/integrating-openid-connect-to-your-application-stack-25ch
-        //    services
-        //        .AddAuthentication()
-        //        .AddJwtBearer(x =>
-        //        {
-        //            x.RequireHttpsMetadata = Convert.ToBoolean($"{configuration["Keycloak1:require-https"]}");
-        //            x.MetadataAddress = $"{configuration["Keycloak1:server-url"]}/realms/Organisations/.well-known/openid-configuration";
-        //            x.TokenValidationParameters = new TokenValidationParameters
-        //            {
-        //                RoleClaimType = "groups",
-        //                ValidAudience = $"{configuration["Keycloak1:audience"]}",
-        //                // https://stackoverflow.com/questions/60306175/bearer-error-invalid-token-error-description-the-issuer-is-invalid
-        //                ValidateIssuer = Convert.ToBoolean($"{configuration["Keycloak1:validate-issuer"]}"),
-        //            };
-        //        });
-
-        //    services.AddAuthorization(o =>
-        //    {
-        //        o.DefaultPolicy = new AuthorizationPolicyBuilder()
-        //            .RequireAuthenticatedUser()
-        //            .RequireClaim("email_verified", "true")
-        //            .Build();
-        //    });
-
-        //    return services;
-        //}
 
         public static IServiceCollection AddSwagger(this IServiceCollection services)
         {

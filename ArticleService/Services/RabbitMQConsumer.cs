@@ -2,9 +2,6 @@
 using RabbitMQ.Client.Events;
 using System.Configuration;
 using System.Text;
-using ArticleService.Data;
-using ArticleService.Factory;
-using Newtonsoft.Json.Linq;
 
 namespace ArticleService.Services
 {

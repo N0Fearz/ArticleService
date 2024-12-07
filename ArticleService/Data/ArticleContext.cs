@@ -5,7 +5,7 @@ namespace ArticleService.Data
 {
     public class ArticleContext(DbContextOptions<ArticleContext> options, ITenantContext tenantContext) : DbContext(options)
     {
-        private ITenantContext _tenantContext = tenantContext;
+        private readonly ITenantContext _tenantContext = tenantContext;
         public DbSet<Article> Articles { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -16,7 +16,7 @@ namespace ArticleService.Data
             }
             else
             {
-                throw new Exception("Connection string not set for tenant.");
+                throw new ArgumentNullException(_tenantContext.ConnectionString, "Connection string not set for tenant.");
             }
         }
 

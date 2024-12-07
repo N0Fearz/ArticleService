@@ -35,6 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Factory\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 
