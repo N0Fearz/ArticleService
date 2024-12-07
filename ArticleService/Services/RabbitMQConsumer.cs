@@ -16,12 +16,10 @@ namespace ArticleService.Services
         private IConnection _connection;
         private IModel _channel;
         private readonly IConfiguration _configuration;
-        private IServiceProvider _serviceProvider;
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public RabbitMQConsumer(IConfiguration configuration, IServiceProvider serviceProvider, IServiceScopeFactory serviceScopeFactory)
+        public RabbitMQConsumer(IConfiguration configuration, IServiceScopeFactory serviceScopeFactory)
         {
-            _serviceProvider = serviceProvider;
             _configuration = configuration;
             _serviceScopeFactory = serviceScopeFactory;
             InitRabbitMQ();
@@ -80,7 +78,7 @@ namespace ArticleService.Services
             await migrationService.MigrateAsync(message);
         }
 
-        private async void StopRabbitMQ()
+        private void StopRabbitMQ()
         {
             _channel?.Close();
             _connection?.Close();

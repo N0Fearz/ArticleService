@@ -5,35 +5,12 @@ using ArticleService.Services;
 using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Connections;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.IdentityModel.Tokens;
-using RabbitMQ.Client;
-using System.Configuration;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//ConnectionFactory connectionFactory = new();
-//connectionFactory.UserName = "user";
-//connectionFactory.Password = "jaLMcAGEyYm46Daj";
-//connectionFactory.VirtualHost = "/";
-//connectionFactory.HostName = "192.168.2.152";
-////connectionFactory.Uri = new Uri("amqp://user:jaLMcAGEyYm46Daj@192.168.2.152:5672");
-//connectionFactory.ClientProvidedName = "Article service";
-//var connection = await connectionFactory.CreateConnectionAsync();
-//using var channel = await connection.CreateChannelAsync();
-//builder.Services.AddHostedService<RabbitMQConsumer>();
 
-//channel.QueueDeclareAsync
-
-var handler = new JwtSecurityTokenHandler();
-var Jwt = string.Empty;
-var org = string.Empty;
-
-//builder.Services.AddKeycloakWebApiAuthentication(builder.Configuration);
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddKeycloakWebApi(builder.Configuration,
@@ -46,11 +23,11 @@ builder.Services
 
     // First, let's just get the access token and read it as a JWT
     var token = ctx.SecurityToken;
-    handler = new JwtSecurityTokenHandler();
-    Jwt = handler.WriteToken(token);
+    var handler = new JwtSecurityTokenHandler();
+    var Jwt = handler.WriteToken(token);
     var parsedJwt = handler.ReadJwtToken(Jwt);
-    org = parsedJwt.Claims.First(c => c.Type == "organization").Value; ;
-
+    var org = parsedJwt.Claims.First(c => c.Type == "organization").Value;
+    Console.WriteLine(org);
 }
     );
 
@@ -80,11 +57,6 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI(options => options.EnableTryItOutByDefault());
-//if (app.Environment.IsDevelopment())
-//{
-//app.UseSwagger();
-//app.UseSwaggerUI();
-//}
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
