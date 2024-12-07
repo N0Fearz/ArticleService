@@ -6,6 +6,8 @@ pipeline {
   environment {
       DOTNET_SYSTEM_GLOBALIZATION_INVARIANT = "true"
       PATH = "${env.HOME}/.dotnet/tools:${env.PATH}" // Voeg ~/.dotnet/tools toe aan het PATH
+      DOCKER_IMAGE = "casgoorman/articleservice" // Pas aan naar jouw image
+      DOCKER_TAG = "latest" // Of gebruik bijv. BUILD_NUMBER voor een unieke tag
   }
   stages{
     stage('Clean and checkout'){
@@ -32,6 +34,11 @@ pipeline {
         sh 'dotnet build ArticleService.sln --configuration Release'
       }
     }
+    stage('Test') {
+        steps {
+            sh 'dotnet test --no-build --verbosity normal'
+        }
+    }
     stage('Install SonarScanner') {
       steps {
           sh 'dotnet tool install --global dotnet-sonarscanner'
@@ -49,5 +56,29 @@ pipeline {
         }
       }
     }
+
+    stage('Build Docker Image') {
+        steps {
+            script {
+                // Zorg dat je een Dockerfile in je project hebt
+                sh """
+                docker build -t ${env.DOCKER_IMAGE}:${env.DOCKER_TAG} .
+                """
+            }
+        }
+    }
+    stage('Push Docker Image') {
+        steps {
+            script {
+                // Login naar Docker Registry (indien nodig)
+                withDockerRegistry([credentialsId: 'docker-hub-credentials', url: 'https://index.docker.io/v1/']) {
+                    sh """
+                    docker push ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}
+                    """
+                }
+            }
+        }
+    }
+    
   }
 }
