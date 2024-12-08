@@ -2,6 +2,7 @@
 
 public interface IArticleService
 {
-    //public string InitiateTenant(string schemaName);
+    
+    public string GetTenantConnectionString(string token);
     
 }

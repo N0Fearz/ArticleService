@@ -16,24 +16,11 @@ using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//ConnectionFactory connectionFactory = new();
-//connectionFactory.UserName = "user";
-//connectionFactory.Password = "jaLMcAGEyYm46Daj";
-//connectionFactory.VirtualHost = "/";
-//connectionFactory.HostName = "192.168.2.152";
-////connectionFactory.Uri = new Uri("amqp://user:jaLMcAGEyYm46Daj@192.168.2.152:5672");
-//connectionFactory.ClientProvidedName = "Article service";
-//var connection = await connectionFactory.CreateConnectionAsync();
-//using var channel = await connection.CreateChannelAsync();
-//builder.Services.AddHostedService<RabbitMQConsumer>();
-
-//channel.QueueDeclareAsync
 
 var handler = new JwtSecurityTokenHandler();
 var Jwt = string.Empty;
 var org = string.Empty;
 
-//builder.Services.AddKeycloakWebApiAuthentication(builder.Configuration);
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddKeycloakWebApi(builder.Configuration,
@@ -49,7 +36,7 @@ builder.Services
     handler = new JwtSecurityTokenHandler();
     Jwt = handler.WriteToken(token);
     var parsedJwt = handler.ReadJwtToken(Jwt);
-    org = parsedJwt.Claims.First(c => c.Type == "organization").Value; ;
+    org = parsedJwt.Claims.First(c => c.Type == "organization").Value;
 
 }
     );
@@ -62,8 +49,11 @@ builder.Services
 builder.Services.AddScoped<IMigrationService, MigrationService>();
 builder.Services.AddTransient<IArticleRepository, ArticleRepository>();
 builder.Services.AddScoped<ITenantContext, TenantContext>();
+builder.Services.AddTransient<IArticleService, ArticleService.Services.ArticleService>();
 builder.Services.AddHostedService<RabbitMQConsumer>();
+builder.Services.AddSingleton<RabbitMqSenderOrganization>();
 builder.Services.AddEndpointsApiExplorer().AddSwagger();
+builder.Services.AddHttpContextAccessor();
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -80,11 +70,6 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI(options => options.EnableTryItOutByDefault());
-//if (app.Environment.IsDevelopment())
-//{
-//app.UseSwagger();
-//app.UseSwaggerUI();
-//}
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

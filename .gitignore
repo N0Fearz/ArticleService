@@ -364,3 +364,4 @@ FodyWeavers.xsd
 /ArticleService/appsettings.json
 
 .idea/*
+./ArticleService/appsettings.Development.json
