@@ -1,7 +1,6 @@
 ﻿using System.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using ArticleService.Data;
-using ArticleService.Factory;
 using ArticleService.Repository;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
