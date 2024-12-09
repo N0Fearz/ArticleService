@@ -3,5 +3,5 @@
 public interface ITenantContext
 {
     string ConnectionString { get; }
-    void SetConnectionString(string connectionString);
+    void SetConnectionString(string schemaName);
 }

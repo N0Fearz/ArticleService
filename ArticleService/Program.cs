@@ -5,11 +5,21 @@ using ArticleService.Services;
 using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Connections;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.IdentityModel.Tokens;
+using RabbitMQ.Client;
+using System.Configuration;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+var handler = new JwtSecurityTokenHandler();
+var Jwt = string.Empty;
+var org = string.Empty;
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -23,11 +33,11 @@ builder.Services
 
     // First, let's just get the access token and read it as a JWT
     var token = ctx.SecurityToken;
-    var handler = new JwtSecurityTokenHandler();
-    var Jwt = handler.WriteToken(token);
+    handler = new JwtSecurityTokenHandler();
+    Jwt = handler.WriteToken(token);
     var parsedJwt = handler.ReadJwtToken(Jwt);
-    var org = parsedJwt.Claims.First(c => c.Type == "organization").Value;
-    Console.WriteLine(org);
+    org = parsedJwt.Claims.First(c => c.Type == "organization").Value;
+
 }
     );
 
@@ -38,9 +48,12 @@ builder.Services
 
 builder.Services.AddScoped<IMigrationService, MigrationService>();
 builder.Services.AddTransient<IArticleRepository, ArticleRepository>();
-builder.Services.AddScoped<ITenantContext, TenantContext>();
+builder.Services.AddSingleton<ITenantContext, TenantContext>();
+builder.Services.AddTransient<IArticleService, ArticleService.Services.ArticleService>();
 builder.Services.AddHostedService<RabbitMQConsumer>();
+builder.Services.AddSingleton<RabbitMqSenderOrganization>();
 builder.Services.AddEndpointsApiExplorer().AddSwagger();
+builder.Services.AddHttpContextAccessor();
 // Add services to the container.
 
 builder.Services.AddControllers();
