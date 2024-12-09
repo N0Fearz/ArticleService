@@ -28,7 +28,8 @@ namespace ArticleService.Controllers
         public async Task<IActionResult> Get()
         {
             var token = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
-            _articleService.GetTenantConnectionString(token);
+            var schemaName = await _articleService.GetTenantSchemaName(token);
+            _articleService.SetConnectionString(schemaName);
             
             var articles = _articleRepository.GetArticles();
             return Ok(articles);

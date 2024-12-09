@@ -12,12 +12,14 @@ namespace ArticleService.Services;
 public class ArticleService : IArticleService
 {
     private readonly RabbitMqSenderOrganization _rabbitMqSenderOrganization;
-    public ArticleService(IArticleRepository articleRepository, RabbitMqSenderOrganization senderOrganization)
+    private readonly ITenantContext _tenantContext;
+    public ArticleService(RabbitMqSenderOrganization senderOrganization, ITenantContext tenantContext)
     {
         _rabbitMqSenderOrganization = senderOrganization;
+        _tenantContext = tenantContext;
     }
 
-    public string GetTenantConnectionString(string token)
+    public async Task<string> GetTenantSchemaName(string token)
     {
         var handler = new JwtSecurityTokenHandler();
         var parsedJwt = handler.ReadJwtToken(token);
@@ -25,8 +27,13 @@ public class ArticleService : IArticleService
 
         var parsed = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(org);
         var id = parsed?.Values.FirstOrDefault()?.GetValueOrDefault("id");
-        var message = _rabbitMqSenderOrganization.SendMessage(id);
+        var message = await _rabbitMqSenderOrganization.SendMessage(id);
 
-        return message.Result;
+        return message;
+    }
+
+    public void SetConnectionString(string schemaName)
+    {
+        _tenantContext.SetConnectionString(schemaName);
     }
 }

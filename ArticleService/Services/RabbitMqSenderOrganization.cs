@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Collections.Concurrent;
+using System.Text;
+using ArticleService.Data;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -6,19 +8,14 @@ namespace ArticleService.Services;
 
 public class RabbitMqSenderOrganization : BackgroundService
 {
-    private IModel _channel;
-    private readonly IConfiguration _configuration;
-    private string _reply;
-    private QueueDeclareOk _replyQueue;
+    private readonly IModel _channel;
+    private readonly string _replyQueue;
+    private readonly ConcurrentDictionary<string, TaskCompletionSource<string>> _pendingRequests = new();
     
     public RabbitMqSenderOrganization(IConfiguration configuration)
     {
-        _configuration = configuration;
-        InitRabbitMQ();
-    }
-    
-    private void InitRabbitMQ()
-    {
+        var _configuration = configuration;
+        
         var factory = new ConnectionFactory
         {
             HostName = _configuration["RabbitMQ:HostName"],
@@ -27,51 +24,59 @@ public class RabbitMqSenderOrganization : BackgroundService
         };
 
         // Establish connection and create a channel
-        var _connection = factory.CreateConnection();
-        _channel = _connection.CreateModel();
+        var connection = factory.CreateConnection();
+        _channel = connection.CreateModel();
         
         
-        _replyQueue = _channel.QueueDeclare(queue: "", exclusive: true);
-        _channel.QueueDeclare("request-queue", exclusive: false);
-        }
-    
+        
+        _replyQueue = _channel.QueueDeclare().QueueName;
+
+        var consumer = new EventingBasicConsumer(_channel);
+        consumer.Received += (sender, e) =>
+        {
+            var correlationId = e.BasicProperties.CorrelationId;
+            var response = Encoding.UTF8.GetString(e.Body.ToArray());
+            Console.WriteLine($"Received message {response}");
+            if (_pendingRequests.TryRemove(correlationId, out var tcs))
+            {
+                tcs.SetResult(response);
+            }
+
+            _channel.BasicAck(e.DeliveryTag, false);
+        };
+
+        _channel.BasicConsume(_replyQueue, false, consumer);
+
+        _pendingRequests = new ConcurrentDictionary<string, TaskCompletionSource<string>>();
+        
+    }
 
     
-    public async Task<string> SendMessage(string message)
+    public Task<string> SendMessage(string message)
     {
-        
+        var correlationId = Guid.NewGuid().ToString();
+        var tcs = new TaskCompletionSource<string>();
+        _pendingRequests.TryAdd(correlationId, tcs);
         var body = Encoding.UTF8.GetBytes(message);
         var routingKey = "request-queue";
         var properties = _channel.CreateBasicProperties();
-        properties.ReplyTo = _replyQueue.QueueName;
-        properties.CorrelationId = Guid.NewGuid().ToString();
+        properties.ReplyTo = _replyQueue;
+        properties.CorrelationId = correlationId;
         _channel.BasicPublish(
             exchange: "", // The topic exchange
             routingKey: routingKey, // Routing key to target specific queues
             basicProperties: properties, // Message properties (can add headers, etc.)
             body: body);
 
-        Console.WriteLine($"Message sent to {routingKey}: {message}");
+        Console.WriteLine($"Respond to: {properties.ReplyTo}");
+        Console.WriteLine($"Message sent to {routingKey}: {correlationId}");
 
-        return await Task.FromResult(_reply);
+        return tcs.Task;
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        
-        var consumer = new EventingBasicConsumer(_channel);
-        consumer.Received += async (model, ea) =>
-        {
-            var body = ea.Body.ToArray();
-            _reply = Encoding.UTF8.GetString(body);
-            
-            Console.WriteLine($"received reply: {_reply}");
-        };
-
-        _channel.BasicConsume(queue: _replyQueue.QueueName,
-            autoAck: true,
-            consumer: consumer);
-    
-        return Task.CompletedTask;
+        // Houd de service draaiende totdat deze wordt gestopt
+        await Task.CompletedTask;
     }
 }

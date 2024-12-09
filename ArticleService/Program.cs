@@ -48,7 +48,7 @@ builder.Services
 
 builder.Services.AddScoped<IMigrationService, MigrationService>();
 builder.Services.AddTransient<IArticleRepository, ArticleRepository>();
-builder.Services.AddScoped<ITenantContext, TenantContext>();
+builder.Services.AddSingleton<ITenantContext, TenantContext>();
 builder.Services.AddTransient<IArticleService, ArticleService.Services.ArticleService>();
 builder.Services.AddHostedService<RabbitMQConsumer>();
 builder.Services.AddSingleton<RabbitMqSenderOrganization>();

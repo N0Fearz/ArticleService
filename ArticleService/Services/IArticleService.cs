@@ -3,6 +3,7 @@
 public interface IArticleService
 {
     
-    public string GetTenantConnectionString(string token);
+    public Task<string> GetTenantSchemaName(string token);
+    public void SetConnectionString(string schemaName);
     
 }
