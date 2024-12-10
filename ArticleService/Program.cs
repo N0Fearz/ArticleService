@@ -16,30 +16,11 @@ using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-var handler = new JwtSecurityTokenHandler();
-var Jwt = string.Empty;
-var org = string.Empty;
+builder.Configuration.AddEnvironmentVariables();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddKeycloakWebApi(builder.Configuration,
-    options =>
-        options.Events.OnTokenValidated = async ctx =>
-{
-    // For some reason, the access token's claims are not getting added to the user in C#
-    // So this method hooks into the TokenValidation and adds it manually...
-    // This definitely seems like a bug to me.
-
-    // First, let's just get the access token and read it as a JWT
-    var token = ctx.SecurityToken;
-    handler = new JwtSecurityTokenHandler();
-    Jwt = handler.WriteToken(token);
-    var parsedJwt = handler.ReadJwtToken(Jwt);
-    org = parsedJwt.Claims.First(c => c.Type == "organization").Value;
-
-}
-    );
+    .AddKeycloakWebApi(builder.Configuration);
 
 builder.Services
     .AddAuthorization()
