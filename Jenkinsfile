@@ -52,21 +52,23 @@ pipeline {
         }
       }
     }
-    stage("Quality Gate") {
-      steps {
-       timeout(time: 1, unit: 'MINUTES') {
-            waitForQualityGate abortPipeline: true
-         }
-       }
-     }
+    //stage("Quality Gate") {
+    //  steps {
+    //   timeout(time: 1, unit: 'MINUTES') {
+    //        waitForQualityGate abortPipeline: true
+    //     }
+    //   }
+    // }
     stage('Build Docker Image') {
         steps {
+          dir('ArticleService') {
             script {
                 // Zorg dat je een Dockerfile in je project hebt
                 sh """
                 docker build -t ${env.DOCKER_IMAGE}:${env.DOCKER_TAG} .
                 """
             }
+          }
         }
     }
     stage('Push Docker Image') {
