@@ -26,7 +26,9 @@ public class MigrationService : IMigrationService
         var dbContext = new ArticleContext(optionsBuilder.Options, scope.ServiceProvider.GetRequiredService<ITenantContext>());
 
         // Check if the migrations are needed
-        await dbContext.Database.EnsureCreatedAsync();
-        await dbContext.Database.MigrateAsync();
+        if (await dbContext.Database.GetPendingMigrationsAsync() is { } migrations && migrations.Any())
+        {
+            await dbContext.Database.MigrateAsync();
+        }
     }
 }
