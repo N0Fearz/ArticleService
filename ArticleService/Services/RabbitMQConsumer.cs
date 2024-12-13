@@ -7,8 +7,8 @@ namespace ArticleService.Services
 {
     public class RabbitMQConsumer : BackgroundService
     {
-        private string _queueName;
-        private readonly string _routingKey = "create.organization"; // Replace with your routing key if needed
+        private readonly string _queueName = "organization-create-queue";
+        private readonly string _routingKey = "organization.create"; // Replace with your routing key if needed
 
         private IConnection _connection;
         private IModel _channel;
@@ -36,12 +36,9 @@ namespace ArticleService.Services
             _channel = _connection.CreateModel();
 
             // Declare a queue (optional for pre-declared queues like amq.topic)
-            _queueName = _channel.QueueDeclare().QueueName;
-
-            // Bind to the topic exchange
-            _channel.QueueBind(queue: _queueName,
-                               exchange: "amq.topic",
-                               routingKey: _routingKey);
+            _channel.QueueDeclare(queue: _queueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
+            _channel.QueueBind(_queueName, "amq.topic", _routingKey);
+            _channel.BasicQos(0, 1, false);
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -56,6 +53,7 @@ namespace ArticleService.Services
 
                 // Process the message
                 await HandleMessageAsync(message);
+                _channel.BasicAck(ea.DeliveryTag, false);
             };
 
             _channel.BasicConsume(queue: _queueName,
