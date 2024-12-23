@@ -13,19 +13,32 @@ using RabbitMQ.Client;
 using System.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using ArticleService.Handlers;
+using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddEnvironmentVariables();
 
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddKeycloakWebApi(builder.Configuration);
+var disableAuth = Environment.GetEnvironmentVariable("DISABLE_AUTH") == "true";
 
-builder.Services
-    .AddAuthorization()
-    .AddKeycloakAuthorization()
-    .AddAuthorizationServer(builder.Configuration);
+if (disableAuth)
+{
+    // Schakel Keycloak-authenticatie uit
+    builder.Services.AddAuthentication("Test")
+        .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>("Test", options => { });
+}
+else
+{
+    builder.Services
+        .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddKeycloakWebApi(builder.Configuration);
+    
+    builder.Services
+        .AddAuthorization()
+        .AddKeycloakAuthorization()
+        .AddAuthorizationServer(builder.Configuration);
+}
 
 builder.Services.AddScoped<IMigrationService, MigrationService>();
 builder.Services.AddTransient<IArticleRepository, ArticleRepository>();
@@ -48,7 +61,6 @@ builder.Services.AddDbContext<ArticleContext>(opt =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-
 app.UseSwagger();
 app.UseSwaggerUI(options => options.EnableTryItOutByDefault());
 
