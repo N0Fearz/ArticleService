@@ -85,4 +85,12 @@ pipeline {
     }
     
   }
+    post {
+        success {
+            build job: 'IntegrationTestsPipeline', wait: false, parameters: [
+                string(name: 'TRIGGER_SERVICE', value: 'ArticleService'),
+                string(name: 'BUILD_NUMBER', value: 'latest')
+            ]
+        }
+    }  
 }
