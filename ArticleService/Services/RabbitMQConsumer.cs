@@ -8,7 +8,7 @@ namespace ArticleService.Services
     public class RabbitMQConsumer : BackgroundService
     {
         private readonly string _queueName = "organization-create-queue";
-        private readonly string _routingKey = "organization.create"; // Replace with your routing key if needed
+        private readonly string _routingKey = "organization.create";
 
         private IConnection _connection;
         private IModel _channel;
