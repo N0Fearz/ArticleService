@@ -5,7 +5,7 @@ namespace ArticleService.Repository
     public interface IArticleRepository
     {
         IEnumerable<Article> GetArticles();
-        Article GetArticleById(int id);
+        IEnumerable<Article> GetArticleByIds(IEnumerable<int> ids);
         void DeleteArticle(int id);
         void UpdateArticle(Article article);
         void InsertArticle(Article article);

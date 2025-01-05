@@ -18,9 +18,9 @@ namespace ArticleService.Repository
             Save();
         }
 
-        public Article GetArticleById(int id)
+        public IEnumerable<Article> GetArticleByIds(IEnumerable<int>  ids)
         {
-            return _articleContext.Articles.Find(id);
+            return _articleContext.Articles.Where(a => ids.Contains(a.Id)).ToList();
         }
 
         public IEnumerable<Article> GetArticles()

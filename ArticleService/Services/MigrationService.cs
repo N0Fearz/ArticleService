@@ -1,4 +1,6 @@
-﻿using ArticleService.Data;
+﻿using System.Runtime.CompilerServices;
+using System.Text;
+using ArticleService.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArticleService.Services;
@@ -13,6 +15,21 @@ public class MigrationService : IMigrationService
         _configuration = configuration;
     }
 
+    public async Task AddSchemaAsync(string schemaName)
+    {
+        var connectionString = _configuration.GetConnectionString("ArticleDB");
+        var optionsBuilder = new DbContextOptionsBuilder<ArticleContext>();
+        optionsBuilder.UseNpgsql(connectionString);
+        
+        using var scope = _serviceProvider.CreateScope();
+        var tenantContext = scope.ServiceProvider.GetRequiredService<ITenantContext>();
+        tenantContext.SetConnectionString(connectionString);
+        var dbContext = new ArticleContext(optionsBuilder.Options, scope.ServiceProvider.GetRequiredService<ITenantContext>());
+        var cmd = new StringBuilder().Append("CREATE SCHEMA IF NOT EXISTS ").Append(schemaName).ToString();
+        var formattableString = FormattableStringFactory.Create(cmd);
+        
+        await dbContext.Database.ExecuteSqlAsync(formattableString);
+    }
     public async Task MigrateAsync(string schemaName)
     {
         var connectionString = _configuration.GetConnectionString("ArticleDB");

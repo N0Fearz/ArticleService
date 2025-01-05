@@ -70,6 +70,8 @@ namespace ArticleService.Services
             using var scope = _serviceScopeFactory.CreateScope();
             
             var migrationService = scope.ServiceProvider.GetRequiredService<IMigrationService>();
+            await migrationService.AddSchemaAsync(message);
+            await Task.Delay((TimeSpan.FromSeconds(5)));
             await migrationService.MigrateAsync(message);
         }
 

@@ -25,19 +25,19 @@ namespace ArticleService.Data
             modelBuilder.Entity<Article>().HasData(
             new Article
             {
-                ArticleId = 1,
+                Id = 1,
                 ArticleCode = "M11256",
                 Description = "Electronic Items",
             },
             new Article
             {
-                ArticleId = 2,
+                Id = 2,
                 ArticleCode = "M11256",
                 Description = "test Items",
             },
             new Article
             {
-                ArticleId = 3,
+                Id = 3,
                 ArticleCode = "M11256",
                 Description = "other Items",
             }
