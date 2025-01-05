@@ -61,7 +61,7 @@ builder.Services.AddDbContext<ArticleContext>(opt =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
-        policy => policy.WithOrigins("http://localhost:3000")
+        policy => policy.WithOrigins("http://192.168.2.152:3000/")
             .AllowAnyHeader()
             .AllowAnyMethod());
 });
@@ -81,4 +81,4 @@ app.MapControllers();
 
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();
