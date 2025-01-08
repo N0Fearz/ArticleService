@@ -20,7 +20,9 @@ public class RabbitMqSenderOrganization : BackgroundService
         {
             HostName = _configuration["RabbitMQ:HostName"],
             UserName = _configuration["RabbitMQ:UserName"],
-            Password = _configuration["RabbitMQ:Password"]
+            Password = _configuration["RabbitMQ:Password"],
+            AutomaticRecoveryEnabled = true,
+            NetworkRecoveryInterval = TimeSpan.FromSeconds(5)
         };
 
         // Establish connection and create a channel

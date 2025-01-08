@@ -45,6 +45,7 @@ builder.Services.AddTransient<IArticleRepository, ArticleRepository>();
 builder.Services.AddSingleton<ITenantContext, TenantContext>();
 builder.Services.AddTransient<IArticleService, ArticleService.Services.ArticleService>();
 builder.Services.AddHostedService<RabbitMQConsumer>();
+builder.Services.AddHostedService<RabbitMqConsumeDeleteOrganization>();
 builder.Services.AddSingleton<RabbitMqSenderOrganization>();
 builder.Services.AddEndpointsApiExplorer().AddSwagger();
 builder.Services.AddHttpContextAccessor();
@@ -56,7 +57,7 @@ builder.Services.AddDbContext<ArticleContext>(opt =>
     opt.UseNpgsql(
         builder.Configuration.GetConnectionString("ArticleDB"),
         o => o
-            .SetPostgresVersion(17, 0)));
+            .SetPostgresVersion(16, 0)));
 
 builder.Services.AddCors(options =>
 {

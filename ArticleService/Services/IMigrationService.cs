@@ -4,4 +4,5 @@ public interface IMigrationService
 {
     Task AddSchemaAsync(string schemaName);
     Task MigrateAsync(string schemaName);
+    Task RemoveSchemaAsync(string schemaName);
 }

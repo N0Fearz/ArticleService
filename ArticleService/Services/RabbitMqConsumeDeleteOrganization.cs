@@ -1,25 +1,28 @@
-﻿using RabbitMQ.Client;
+﻿using System.Text;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System.Configuration;
-using System.Text;
 
-namespace ArticleService.Services
-{
-    public class RabbitMQConsumer : BackgroundService
+namespace ArticleService.Services;
+
+public class RabbitMqConsumeDeleteOrganization: BackgroundService
     {
-        private readonly string _queueName = "organization-create-queue-article";
-        private readonly string _routingKey = "organization.create";
+        private readonly string _queueName = "organization-delete-queue";
+        private readonly string _routingKey = "organization.delete";
 
-        private readonly IConnection _connection;
-        private readonly IModel _channel;
+        private IConnection _connection;
+        private IModel _channel;
         private readonly IConfiguration _configuration;
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public RabbitMQConsumer(IConfiguration configuration, IServiceScopeFactory serviceScopeFactory)
+        public RabbitMqConsumeDeleteOrganization(IConfiguration configuration, IServiceScopeFactory serviceScopeFactory)
         {
             _configuration = configuration;
             _serviceScopeFactory = serviceScopeFactory;
-            
+            InitRabbitMQ();
+        }
+
+        private void InitRabbitMQ()
+        {
             var factory = new ConnectionFactory
             {
                 HostName = _configuration["RabbitMQ:HostName"],
@@ -36,11 +39,10 @@ namespace ArticleService.Services
             _channel.QueueBind(_queueName, "amq.topic", _routingKey);
             _channel.BasicQos(0, 1, false);
         }
-        
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            stoppingToken.Register(StopRabbitMQ);
+            stoppingToken.Register(() => StopRabbitMQ());
 
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += async (model, ea) =>
@@ -66,9 +68,7 @@ namespace ArticleService.Services
             using var scope = _serviceScopeFactory.CreateScope();
             
             var migrationService = scope.ServiceProvider.GetRequiredService<IMigrationService>();
-            await migrationService.AddSchemaAsync(message);
-            
-            await migrationService.MigrateAsync(message);
+            await migrationService.RemoveSchemaAsync(message);
         }
 
         private void StopRabbitMQ()
@@ -82,5 +82,4 @@ namespace ArticleService.Services
             StopRabbitMQ();
             base.Dispose();
         }
-    }
 }
