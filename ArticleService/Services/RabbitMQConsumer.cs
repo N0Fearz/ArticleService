@@ -71,7 +71,7 @@ namespace ArticleService.Services
             
             var migrationService = scope.ServiceProvider.GetRequiredService<IMigrationService>();
             await migrationService.AddSchemaAsync(message);
-            await Task.Delay((TimeSpan.FromSeconds(5)));
+            
             await migrationService.MigrateAsync(message);
         }
 

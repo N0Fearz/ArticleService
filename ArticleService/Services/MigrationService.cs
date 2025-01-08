@@ -33,7 +33,7 @@ public class MigrationService : IMigrationService
     public async Task MigrateAsync(string schemaName)
     {
         var connectionString = _configuration.GetConnectionString("ArticleDB");
-        var connectionStringWithSchema = $"{connectionString+schemaName};";
+        var connectionStringWithSchema = $"{connectionString}SearchPath={schemaName};";
         var optionsBuilder = new DbContextOptionsBuilder<ArticleContext>();
         optionsBuilder.UseNpgsql(connectionStringWithSchema);
         
