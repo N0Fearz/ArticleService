@@ -22,6 +22,13 @@ namespace ArticleService.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Article>(entity =>
+            {
+                entity.Property(o => o.ArticleCode)
+                    .IsRequired()
+                    .HasMaxLength(50);
+            });
+            
             modelBuilder.Entity<Article>().HasData(
             new Article
             {
