@@ -47,7 +47,7 @@ pipeline {
             sh '''
             dotnet sonarscanner begin /k:"ArticleService" /o:"n0fearz"
             dotnet build --configuration Release
-            dotnet sonarscanner end
+            dotnet sonarscanner end /d:sonar.login="$sonar-token"
             '''
         }
       }
