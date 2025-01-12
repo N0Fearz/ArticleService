@@ -45,9 +45,9 @@ pipeline {
         steps {
           withSonarQubeEnv('SonarQube') { // Naam van de SonarQube server zoals ingesteld in Jenkins
             sh '''
-            dotnet sonarscanner begin /k:"ArticleService" /o:"n0fearz" /d:sonar.login="$SONAR_TOKEN"
+            dotnet sonarscanner begin /k:"ArticleService" /o:"n0fearz" /d:sonar.login="$sonar-token"
             dotnet build --configuration Release
-            dotnet sonarscanner end /d:sonar.login="$SONAR_TOKEN"
+            dotnet sonarscanner end /d:sonar.login="$sonar-token"
             '''
         }
       }
