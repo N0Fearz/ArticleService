@@ -93,27 +93,10 @@ pipeline {
   }
     post {
         success {
-            // build job: 'IntegrationTest', wait: false, parameters: [
-            //     string(name: 'TRIGGER_SERVICE', value: 'ArticleService'),
-            //     string(name: 'BUILD_NUMBER', value: 'latest')
-            // ]
-            script {
-                // Start de integratietest en wacht tot deze voltooid is
-                def integrationTestResult = build job: 'IntegrationTest', 
-                                                  wait: true, 
-                                                  propagate: false, // Zelf bepalen of de pipeline slaagt of faalt
-                                                  parameters: [
-                                                      string(name: 'TRIGGER_SERVICE', value: 'ArticleService'),
-                                                      string(name: 'BUILD_NUMBER', value: 'latest')
-                                                  ]
-                
-                // Controleer het resultaat van de integratietest
-                if (integrationTestResult.result == 'SUCCESS') {
-                    echo 'Integratietest succesvol afgerond.'
-                } else {
-                    error "Integratietest is gefaald met status: ${integrationTestResult.result}"
-                }
-            }
+            build job: 'IntegrationTest', wait: false, parameters: [
+                string(name: 'TRIGGER_SERVICE', value: 'ArticleService'),
+                string(name: 'BUILD_NUMBER', value: 'latest')
+            ]
         }
     }  
 }
