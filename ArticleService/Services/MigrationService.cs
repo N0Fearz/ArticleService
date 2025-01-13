@@ -34,6 +34,9 @@ public class MigrationService : IMigrationService
     {
         var connectionString = _configuration.GetConnectionString("ArticleDB");
         var connectionStringWithSchema = $"{connectionString}SearchPath={schemaName};";
+        
+        Console.WriteLine(connectionStringWithSchema);
+        
         var optionsBuilder = new DbContextOptionsBuilder<ArticleContext>();
         optionsBuilder.UseNpgsql(connectionStringWithSchema);
         
