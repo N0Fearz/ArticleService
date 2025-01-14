@@ -87,6 +87,21 @@ namespace ArticleService.Controllers
             return Ok();
         }
         
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] Article article)
+        {
+            var accessToken = _httpContextAccessor.HttpContext.Request.Headers["Authorization"]
+                .ToString()
+                .Replace("Bearer ", string.Empty);
+            var schemaName = await _articleService.GetTenantSchemaName(accessToken);
+            _articleService.SetConnectionString(schemaName);
+
+            article.Id = 0;
+            _articleRepository.InsertArticle(article);
+            
+            return Ok(article);
+        }
+        
         [HttpDelete("delete/{articleId}")]
         public async Task<IActionResult> Delete(int articleId)
         {
