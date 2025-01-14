@@ -47,6 +47,7 @@ builder.Services.AddTransient<IArticleService, ArticleService.Services.ArticleSe
 builder.Services.AddHostedService<RabbitMQConsumer>();
 builder.Services.AddHostedService<RabbitMqConsumeDeleteOrganization>();
 builder.Services.AddSingleton<RabbitMqSenderOrganization>();
+builder.Services.AddSingleton<ILogPublisher, LogPublisher>();
 builder.Services.AddEndpointsApiExplorer().AddSwagger();
 builder.Services.AddHttpContextAccessor();
 // Add services to the container.

@@ -19,11 +19,13 @@ namespace ArticleService.Controllers
         private readonly IArticleRepository _articleRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IArticleService _articleService;
-        public ArticleController(IArticleRepository articleRepository, IHttpContextAccessor httpContextAccessor, IArticleService articleService)
+        private readonly ILogPublisher _logPublisher;
+        public ArticleController(IArticleRepository articleRepository, IHttpContextAccessor httpContextAccessor, IArticleService articleService, ILogPublisher logPublisher)
         {
             _articleRepository = articleRepository;
             _httpContextAccessor = httpContextAccessor;
             _articleService = articleService;
+            _logPublisher = logPublisher;
         }
 
         [HttpGet]
@@ -67,6 +69,17 @@ namespace ArticleService.Controllers
             _articleService.SetConnectionString(schemaName);
             
             _articleRepository.UpdateArticle(article);
+            _logPublisher.SendMessage(new LogMessage
+            {
+                ServiceName = "ArticleService",
+                LogLevel = "Information",
+                Message = "Article updated successfully.",
+                Timestamp = DateTime.Now,
+                Metadata = new Dictionary<string, string>
+                {
+                    { "ArticleCode", article.ArticleCode }
+                }
+            });
             return Ok(article);
         }
         
@@ -84,6 +97,17 @@ namespace ArticleService.Controllers
                 article.Id = 0;
                 _articleRepository.InsertArticle(article);
             }
+            _logPublisher.SendMessage(new LogMessage
+            {
+                ServiceName = "ArticleService",
+                LogLevel = "Information",
+                Message = "Articles created successfully.",
+                Timestamp = DateTime.Now,
+                Metadata = new Dictionary<string, string>
+                {
+                    { "ArticleCount", articles.Count.ToString() }
+                }
+            });
             return Ok();
         }
         
@@ -98,7 +122,17 @@ namespace ArticleService.Controllers
 
             article.Id = 0;
             _articleRepository.InsertArticle(article);
-            
+            _logPublisher.SendMessage(new LogMessage
+            {
+                ServiceName = "ArticleService",
+                LogLevel = "Information",
+                Message = "Article created successfully.",
+                Timestamp = DateTime.Now,
+                Metadata = new Dictionary<string, string>
+                {
+                    { "ArticleCode", article.ArticleCode }
+                }
+            });
             return Ok(article);
         }
         
@@ -112,6 +146,17 @@ namespace ArticleService.Controllers
             _articleService.SetConnectionString(schemaName);
             
             _articleRepository.DeleteArticle(articleId);
+            _logPublisher.SendMessage(new LogMessage
+            {
+                ServiceName = "ArticleService",
+                LogLevel = "Information",
+                Message = "Article deleted successfully.",
+                Timestamp = DateTime.Now,
+                Metadata = new Dictionary<string, string>
+                {
+                    { "ArticleCode", articleId.ToString() }
+                }
+            });
             return Ok();
         }
     }

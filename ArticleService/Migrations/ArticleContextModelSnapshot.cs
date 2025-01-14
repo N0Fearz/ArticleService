@@ -31,7 +31,8 @@ namespace ArticleService.Migrations
 
                     b.Property<string>("ArticleCode")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Description")
                         .IsRequired()

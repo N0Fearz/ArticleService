@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Text;
 using ArticleService.Data;
+using ArticleService.Models;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -11,10 +12,12 @@ public class RabbitMqSenderOrganization : BackgroundService
     private readonly IModel _channel;
     private readonly string _replyQueue;
     private readonly ConcurrentDictionary<string, TaskCompletionSource<string>> _pendingRequests = new();
+    private readonly ILogPublisher _logPublisher;
     
-    public RabbitMqSenderOrganization(IConfiguration configuration)
+    public RabbitMqSenderOrganization(IConfiguration configuration, ILogPublisher logPublisher)
     {
         var _configuration = configuration;
+        _logPublisher = logPublisher;
         
         var factory = new ConnectionFactory
         {
@@ -56,24 +59,39 @@ public class RabbitMqSenderOrganization : BackgroundService
     
     public Task<string> SendMessage(string message)
     {
-        var correlationId = Guid.NewGuid().ToString();
-        var tcs = new TaskCompletionSource<string>();
-        _pendingRequests.TryAdd(correlationId, tcs);
-        var body = Encoding.UTF8.GetBytes(message);
-        var routingKey = "request-queue";
-        var properties = _channel.CreateBasicProperties();
-        properties.ReplyTo = _replyQueue;
-        properties.CorrelationId = correlationId;
-        _channel.BasicPublish(
-            exchange: "", // The topic exchange
-            routingKey: routingKey, // Routing key to target specific queues
-            basicProperties: properties, // Message properties (can add headers, etc.)
-            body: body);
+        try
+        {
+            var correlationId = Guid.NewGuid().ToString();
+            var tcs = new TaskCompletionSource<string>();
+            _pendingRequests.TryAdd(correlationId, tcs);
+            var body = Encoding.UTF8.GetBytes(message);
+            var routingKey = "request-queue";
+            var properties = _channel.CreateBasicProperties();
+            properties.ReplyTo = _replyQueue;
+            properties.CorrelationId = correlationId;
+            _channel.BasicPublish(
+                exchange: "", // The topic exchange
+                routingKey: routingKey, // Routing key to target specific queues
+                basicProperties: properties, // Message properties (can add headers, etc.)
+                body: body);
 
-        Console.WriteLine($"Respond to: {properties.ReplyTo}");
-        Console.WriteLine($"Message sent to {routingKey}: {correlationId}");
+            Console.WriteLine($"Respond to: {properties.ReplyTo}");
+            Console.WriteLine($"Message sent to {routingKey}: {correlationId}");
 
-        return tcs.Task;
+            return tcs.Task;
+        }
+        catch (Exception e)
+        {
+            _logPublisher.SendMessage(new LogMessage
+            {
+                ServiceName = "ArticleService",
+                LogLevel = "Error",
+                Message = $"Failed to receive message. Error: {e.Message}",
+                Timestamp = DateTime.Now,
+            });
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ArticleService.Migrations
 {
     [DbContext(typeof(ArticleContext))]
-    [Migration("20250107225549_InitialCreate")]
+    [Migration("20250114161708_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -34,7 +34,8 @@ namespace ArticleService.Migrations
 
                     b.Property<string>("ArticleCode")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Description")
                         .IsRequired()
